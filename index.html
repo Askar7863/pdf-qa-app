@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>PDF Q&A Bot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eef2f3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        input[type="file"], input[type="text"], button {
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #uploadStatus, #answer {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>📄 Upload PDF & Ask a Question</h2>
+
+        <!-- Upload PDF -->
+        <input type="file" id="pdfFile" accept=".pdf">
+        <button onclick="uploadPDF()">Upload PDF</button>
+        <p id="uploadStatus"></p>
+
+        <!-- Ask a question -->
+        <input type="text" id="question" placeholder="Ask a question about the PDF...">
+        <button onclick="askQuestion()">Ask</button>
+        <p id="answer"></p>
+    </div>
+
+    <script>
+        // Function to upload the selected PDF file to backend
+        async function uploadPDF() {
+            const fileInput = document.getElementById("pdfFile");
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please choose a PDF file first.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await fetch("http://localhost:8000/upload-pdf/", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+            document.getElementById("uploadStatus").innerText = result.message || result.error;
+        }
+
+        // Function to ask a question and show the answer
+        async function askQuestion() {
+            const question = document.getElementById("question").value;
+
+            if (!question) {
+                alert("Please type a question.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("question", question);
+
+            const response = await fetch("http://localhost:8000/ask/", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+            document.getElementById("answer").innerText = "Answer: " + (result.answer || result.error);
+        }
+    </script>
+</body>
+</html>
+
